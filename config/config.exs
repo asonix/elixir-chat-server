@@ -10,11 +10,11 @@ use Mix.Config
 
 # You can configure for your application as:
 #
-#     config :tcp_fun, key: :value
+#     config :chat, key: :value
 #
 # And access this configuration in your application as:
 #
-#     Application.get_env(:tcp_fun, :key)
+#     Application.get_env(:chat, :key)
 #
 # Or configure a 3rd-party app:
 #

@@ -1,8 +1,8 @@
-defmodule TcpFun.User do
+defmodule Chat.User do
   use GenServer
 
   defmodule UserInfo do
-    defstruct [:id, :username, :signature]
+    defstruct [:id, :username, :signature, :connection, :connections_module]
   end
 
   defmodule InvalidUserError do
@@ -26,6 +26,10 @@ defmodule TcpFun.User do
     with {:error, err} <- verify_user(user_info), do: raise err
   end
 
+  def message(user_info, message) do
+    user_info.connections_module.message(user_info.connection, message)
+  end
+
   ## Public API
 
   def create(username) do
@@ -35,7 +39,7 @@ defmodule TcpFun.User do
   ## Server Callbacks
 
   def init(:ok) do
-    {:ok, count}
+    {:ok, 0}
   end
 
   def handle_call({:create, username}, _from, count) do

@@ -1,8 +1,8 @@
-defmodule TcpFun.Mixfile do
+defmodule Chat.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :tcp_fun,
+    [app: :chat,
      version: "0.1.0",
      elixir: "~> 1.3",
      build_embedded: Mix.env == :prod,

@@ -1,6 +1,6 @@
-defmodule TcpFunTest do
+defmodule ChatTest do
   use ExUnit.Case
-  doctest TcpFun
+  doctest Chat
 
   test "the truth" do
     assert 1 + 1 == 2
