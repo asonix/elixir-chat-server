@@ -38,6 +38,12 @@ defmodule Chat.Room do
     {:ok, :set}
   end
 
+  def message(room, message) do
+    GenServer.cast(room, {:message, message})
+
+    {:ok, :sent}
+  end
+
   ## Server Callbacks
 
   def init(:ok) do

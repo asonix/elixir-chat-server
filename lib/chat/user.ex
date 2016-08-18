@@ -15,15 +15,15 @@ defmodule Chat.User do
     end
   end
 
-  def verify_user(user_info) do
-    case sign_user(user_info) do
+  def verify_user(user_info, password) do
+    case sign_user(user_info, password) do
       ^user_info -> {:ok, user_info}
       _ -> InvalidUserError.exception(user_info)
     end
   end
 
-  def verify_user!(user_info) do
-    with {:error, err} <- verify_user(user_info), do: raise err
+  def verify_user!(user_info, password) do
+    with {:error, err} <- verify_user(user_info, password), do: raise err
   end
 
   def message(user_info, message) do
@@ -32,8 +32,8 @@ defmodule Chat.User do
 
   ## Public API
 
-  def create(username) do
-    GenServer.call(__MODULE__, {:create, username})
+  def create(user_info, password) do
+    GenServer.call(__MODULE__, {:create, user_info, password})
   end
 
   ## Server Callbacks
@@ -42,13 +42,13 @@ defmodule Chat.User do
     {:ok, 0}
   end
 
-  def handle_call({:create, username}, _from, count) do
-    {:reply, sign_user(%UserInfo{id: count, username: username}), count+1}
+  def handle_call({:create, %{username: username}, password}, _from, count) do
+    {:reply, {:ok, sign_user(%UserInfo{id: count, username: username}, password)}, count+1}
   end
 
   ## Private
 
-  defp sign_user(%UserInfo{id: _id, username: _username} = user_info) do
+  defp sign_user(%UserInfo{id: _id, username: _username} = user_info, _password) do
     %{user_info | signature: 1234}
   end
 

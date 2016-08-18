@@ -22,6 +22,10 @@ defmodule Chat.Rooms do
       do: Room.info(room_info.pid, room_info)
   end
 
+  def get(rooms, room_info) do
+    GenServer.call(rooms, {:get, room_info})
+  end
+
   def join(rooms, user_info, room_info) do
     with {:ok, pid} <- GenServer.call(rooms, {:get, room_info}),
       do: Room.join(pid, user_info)
@@ -47,6 +51,11 @@ defmodule Chat.Rooms do
   def list(rooms, room_info) do
     with {:ok, room_pids} <- GenServer.call(rooms, {:list, room_info}),
       do: {:ok, get_info(room_pids)}
+  end
+
+  def message(rooms, room_info, message) do
+    with {:ok, pid} <- GenServer.call(rooms, {:get, room_info}),
+      do: Room.message(pid, message)
   end
 
   defp get_info(nil), do: nil
