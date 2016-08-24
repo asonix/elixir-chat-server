@@ -17,8 +17,8 @@ defmodule Chat.Rooms do
     GenServer.start_link(__MODULE__, :ok, [])
   end
 
-  def create(rooms, name) do
-    with {:ok, room_info} <- GenServer.call(rooms, {:create, name}),
+  def create(rooms, room_info) do
+    with {:ok, room_info} <- GenServer.call(rooms, {:create, room_info}),
       do: Room.info(room_info.pid, room_info)
   end
 
@@ -82,6 +82,8 @@ defmodule Chat.Rooms do
   end
 
   def handle_call({:create, room_info}, _from, rooms) do
+    room_info = %{ room_info | id: rooms.count+1 }
+
     case Task.Supervisor.start_child(Chat.RoomSupervisor, fn ->
       Chat.Room.start_link(room_info)
     end) do
@@ -105,9 +107,9 @@ defmodule Chat.Rooms do
   def handle_call({:destroy, room_info}, _from, rooms) do
     case get_room_pid(rooms, room_info) do
       nil ->
-        {:reply, {:ok, :deleted}, rooms}
+        {:reply, {:ok, :destroyed}, rooms}
       _ ->
-        {:reply, {:ok, :deleted}, rooms}
+        {:reply, {:ok, :destroyed}, remove_room(rooms, room_info)}
     end
   end
 
@@ -124,9 +126,7 @@ defmodule Chat.Rooms do
   end
 
   defp add_room(rooms, room_info, pid) do
-    room_info = room_info
-      |> Map.put(:id, rooms.count+1)
-      |> Map.put(:pid, pid)
+    room_info = %{ room_info | pid: pid }
 
     rooms = rooms
       |> Map.update(:count, 0, &(&1+1))
@@ -134,6 +134,13 @@ defmodule Chat.Rooms do
       |> put_in([:ids_map, rooms.count+1], pid)
 
     {room_info, rooms}
+  end
+
+  defp remove_room(rooms, room_info) do
+    rooms
+    |> update_in([:rooms_map, room_info.name], &List.delete(&1, room_info.id))
+    |> pop_in([:ids_map, room_info.id])
+    |> elem(1)
   end
 
   defp get_room_pid(rooms, %RoomInfo{id: id}) do

@@ -47,7 +47,7 @@ defmodule Chat.Room do
   ## Server Callbacks
 
   def init(:ok) do
-    {:ok, []}
+    {:ok, %__MODULE__{}}
   end
 
   def handle_call({:destroy}, _from, room) do
@@ -59,7 +59,11 @@ defmodule Chat.Room do
   end
 
   def handle_cast({:info, room_info}, _from, room) do
-    {:noreply, Map.put(room, :room_info, room_info)}
+    room_info = %{ room_info |
+      name: room_info.name,
+      description: room_info.description }
+
+    {:noreply, room_info}
   end
 
   def handle_cast({:message, message}, _from, room) do
